@@ -1,0 +1,93 @@
+@font-face {
+  font-family: '8pxPixelFont_hans';
+  src: url('fusion-pixel-8px_hans.woff2') format('truetype');
+  /* 可以添加更多格式的支持，如 .woff, .woff2 等 */
+  font-weight: normal;
+  font-style: normal;
+}
+@font-face {
+  font-family: '8pxPixelFont_hant';
+  src: url('fusion-pixel-8px_hant.woff2') format('truetype');
+  /* 可以添加更多格式的支持，如 .woff, .woff2 等 */
+  font-weight: normal;
+  font-style: normal;
+}
+@font-face {
+  font-family: '8pxPixelFont_latin';
+  src: url('fusion-pixel-8px-latin.woff2') format('truetype');
+  /* 可以添加更多格式的支持，如 .woff, .woff2 等 */
+  font-weight: normal;
+  font-style: normal;
+}
+@font-face {
+  font-family: '10pxPixelFont_latin';
+  src: url('fusion-pixel-10px-latin.ttf') format('truetype');
+  /* 可以添加更多格式的支持，如 .woff, .woff2 等 */
+  font-weight: normal;
+  font-style: normal;
+}
+@font-face {
+  font-family: '10pxPixelFont_hans';
+  src: url('fusion-pixel-10px-zh_hans.ttf') format('truetype');
+  /* 可以添加更多格式的支持，如 .woff, .woff2 等 */
+  font-weight: normal;
+  font-style: normal;
+}
+@font-face {
+  font-family: '10pxPixelFont_hant';
+  src: url('fusion-pixel-10px-zh_hant.ttf') format('truetype');
+  /* 可以添加更多格式的支持，如 .woff, .woff2 等 */
+  font-weight: normal;
+  font-style: normal;
+}
+* {
+  /* font-family: '10pxPixelFont_hans','10pxPixelFont_hant','10pxPixelFont_latin',Inter, Avenir, Helvetica, Arial, sans-serif; */
+  font-family: Inter, Avenir, Helvetica, Arial, sans-serif;
+}
+:root {
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 400;
+  color: rgb(223, 223, 223);
+  background-color: #0f0f0f;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-text-size-adjust: 100%;
+
+  --bg-color:#111111;
+
+  --menu-text-color:#9f9f9f;
+  --menu-active-text-color:#90d3f0;
+
+}
+
+.logo {
+  height: 6em;
+  padding: 1.5em;
+  will-change: filter;
+  transition: 0.75s;
+}
+
+.logo.tauri:hover {
+  filter: drop-shadow(0 0 2em #24c8db);
+}
+
+.app{
+  margin: 0;
+  padding: 0;
+}
+
+.common-layout{
+  height: 100%;
+}
+.common-layout .common-layout-aside{
+  height: 100%;
+  overflow: hidden;
+  transition: width 0.1s;
+}
+
+.el-select__selection {
+  max-height: 32px;
+}

@@ -1,0 +1,3 @@
+List of devices attached
+fd80a4a1               device product:alioth model:M2012K11AC device:alioth transport_id:1
+

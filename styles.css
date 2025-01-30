@@ -1,0 +1,10 @@
+/* ... existing code ... */
+.bottom-right-buttons {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  display: flex;
+  flex-direction: row; /* 确保按钮在同一行 */
+  gap: 10px;
+}
+/* ... existing code ... */
