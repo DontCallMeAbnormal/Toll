@@ -2,7 +2,10 @@
   <div>
     <div>
       <h3>音乐节奏</h3>
-      <div id="music-rhythm">
+      <div id="music-rhythm" style="
+            width: 100%;
+            overflow-x: auto;
+        ">
         <div 
           class="progress-bar" 
           @wheel="handleWheel"
@@ -50,7 +53,7 @@
             <el-option label="等于" value="equal_to" />
             <el-option label="小于" value="less_than" />
             <el-option label="范围" value="range" />
-            <el-option label="任何值" value="any_value" />
+            <el-option label="默认留白" value="any_value" />
           </el-select>
 
           <el-input
@@ -127,6 +130,7 @@ export default {
 
       const rhythm = await invoke('parse_midi', { file: midiData });
       this.musicRhythm = JSON.parse(rhythm);
+      console.log(this.musicRhythm);
       this.calculateTotalTime();
     },
     // 计算总时间
@@ -138,11 +142,15 @@ export default {
       }
     },
     // 处理图片上传
-    handleImageUpload(file, index) {
-      if (file) {
-        this.images[index].file = file.raw;
-        this.images[index].url = URL.createObjectURL(file.raw);
-      }
+    async handleImageUpload(file, index) {
+        if (file) {
+            this.images[index].file = file.raw;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                this.images[index].url = e.target.result; // 直接赋值完整的 base64 数据 URL
+            };
+            reader.readAsDataURL(file.raw);
+        }
     },
     // 添加图片上传框
     addImageUpload() {
@@ -175,6 +183,7 @@ export default {
       });
       if (isValid) {
         // 根据上传的 MIDI 文件和图片生成动画
+        console.log('musicRhythm:', this.musicRhythm, 'images:', this.images);
         invoke('generate_animation', { musicRhythm: this.musicRhythm, images: this.images })
           .then(response => {
             console.log('Animation generated:', response);
@@ -351,7 +360,7 @@ export default {
 .thumbnail img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
 }
 
 .bottom-right-buttons {

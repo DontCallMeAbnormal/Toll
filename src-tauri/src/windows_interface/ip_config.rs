@@ -108,6 +108,8 @@ pub fn flush_dns() -> Result<String, String> {
         return Err("Failed to execute command".to_string());
     }
 }
+
+
 fn extract_ip_address(output: &str) -> String {
     // 匹配IP地址的正则表达式
     let re = Regex::new(r"IPv4 地址( )*(\. )*:\s*(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})").unwrap();

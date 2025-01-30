@@ -4,6 +4,7 @@ use encoding::DecoderTrap;
 use std::ffi::OsStr;
 use std::iter;
 use std::os::windows::ffi::OsStrExt;
+use std::process::Command;
 use std::ptr;
 use std::time::Duration;
 use winapi::shared::minwindef::DWORD;
@@ -18,15 +19,11 @@ use winapi::um::processthreadsapi::{
     CreateProcessW, GetExitCodeProcess, TerminateProcess, LPPROCESS_INFORMATION, LPSTARTUPINFOW,
     PROCESS_INFORMATION, STARTUPINFOW,
 };
-use winapi::um::synchapi::WaitForSingleObject;
 use winapi::um::winbase::CREATE_NO_WINDOW;
 use winapi::um::winbase::CREATE_UNICODE_ENVIRONMENT;
-use winapi::um::winbase::INFINITE;
-use winapi::um::winbase::STARTF_USESHOWWINDOW;
-use winapi::um::winbase::STARTF_USESTDHANDLES;
 use winapi::um::winnt::{HANDLE, LPCWSTR, LPWSTR};
 use winapi::um::winuser::SW_SHOW;
-
+use std::os::windows::process::CommandExt;
 #[allow(dead_code)]
 pub fn execute_hidden_cmd(cmd_command: &str) -> Result<HANDLE, String> {
     app_log!("{:?}", cmd_command);
@@ -163,29 +160,28 @@ pub fn std_to_string(stdout: &Vec<u8>) -> String {
     output.trim_end().into()
 }
 
-// tests for the commands functions.
-#[cfg(test)]
-mod test {
-    use std::ffi::CString;
-
-    use crate::windows_interface::hidden_proecss::close_process;
-    use winapi::shared::windef::HWND;
-    use winapi::um::winnt::LPCSTR;
-    use winapi::um::winuser::{DestroyWindow, SendMessageA, WM_CLOSE};
-    use winapi::{shared::ntdef::HANDLE, um::winuser::FindWindowA};
-
-    #[test]
-    fn test_cmd_output() {
-        let class_name = "TMainForm";
-        let window_name = "FlashPad";
-        let class_name = CString::new(class_name).expect("转换失败");
-        let window_name = CString::new(window_name).expect("转换失败");
-        unsafe {
-            let h_wnd: HWND = FindWindowA(class_name.as_ptr(), window_name.as_ptr());
-            eprintln!("{:?}", h_wnd);
-            let bol = DestroyWindow(h_wnd);
-            eprintln!("{}", bol);
-        };
-        assert_eq!(2 + 1, 4);
+/// 执行命令，不显示窗口
+/// cmd: 命令
+/// 返回值：执行结果
+/// 示例：
+/// cmd_exec_no_window("ipconfig /all")
+pub fn cmd_exec_no_window(cmd: &str) -> Result<String, String> {
+    let output = Command::new("cmd")
+        .creation_flags(CREATE_NO_WINDOW)
+        .args(["/C", cmd])
+        .output();
+    if let Err(err) = output {
+        app_log!("Failed to execute command: {}", err);
+        return Err(format!("Failed to execute command: {}", err));
+    }
+    let output = output.unwrap();
+    if output.status.success() {
+        let chars = std_to_string(&output.stdout);
+        app_log!("cmd_exec_no_window:{}", chars);
+        return Ok(chars);
+    } else {
+        let chars = std_to_string(&output.stderr);
+        app_log!("Failed cmd_exec_no_window:{}", chars);
+        return Err(chars);
     }
 }

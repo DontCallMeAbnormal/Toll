@@ -120,6 +120,7 @@ fn start_tauri_app() {
             enable_keyborad_input,
             disable_keybord_input,
             midi_handle::midi_parse::parse_midi,
+            midi_handle::midi_parse::generate_animation,
         ])
         .manage(ScrcpyProecss::new())
         .run(tauri::generate_context!())

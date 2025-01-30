@@ -41,7 +41,8 @@
         "icons/icon.ico"
       ],
       "resources": [
-        "./plugin/scrcpy"
+        "./plugin/scrcpy",
+        "./plugin/ffmpeg"
       ]
     },
     "security": {

@@ -38,11 +38,11 @@ pub fn build_root_command(process_path: &str, param: &str) -> Result<String, Str
     let current_exe_path = get_process_root_path()?;
     // 构造scrcpy执行文件的完整路径
     let mut commd_path = String::new();
-    commd_path.push_str("\"");
+    // commd_path.push_str("\"");
     commd_path.push_str(&current_exe_path);
     commd_path.push_str("\\");
     commd_path.push_str(process_path);
-    commd_path.push_str("\"");
+    // commd_path.push_str("\"");
 
     cmd_command.push_str(&commd_path);
     cmd_command.push_str(" ");

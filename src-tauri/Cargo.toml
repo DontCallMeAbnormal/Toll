@@ -25,8 +25,9 @@ chrono = "0.4.38"
 rdev =  { version = "0.5.3", features = ["unstable_grab"] }
 lazy_static = "1.4.0"
 midly = "0.5.3"
-ffmpeg-next = "7.1.0"
-image = "0.24"
+image = "0.25.5"
+tempfile = "3.3.0"
+reqwest = { version = "0.11", features = ["blocking", "json"] }
 [features]
 # this feature is used for production builds or when `devPath` points to the filesystem
 # DO NOT REMOVE!!
