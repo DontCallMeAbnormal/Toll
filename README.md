@@ -1,25 +1,78 @@
-# Tauri + Vue 3
+# Toll 项目文档
 
-This template should help get you started developing with Tauri + Vue 3 in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+## 项目概述
+Toll 是一个基于 Vue.js 和 Tauri 的桌面应用程序，主要用于设备投屏和音乐节奏动画生成。项目分为两个主要功能模块：设备投屏和音乐节奏动画生成。
 
-## Recommended IDE Setup
+## 功能模块
 
-- [VS Code](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) + [Tauri](https://marketplace.visualstudio.com/items?itemName=tauri-apps.tauri-vscode) + [rust-analyzer](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer)
+### 1. 设备投屏 (ScrcpyView.vue)
+#### 功能描述
+设备投屏模块允许用户将移动设备的屏幕投射到电脑上，并提供多种配置选项来调整投屏的外观和行为。
 
+#### 主要功能
+- **窗口位置和大小调整**：用户可以设置投屏窗口的位置（x, y坐标）和大小（宽度、高度）。
+- **文件推送**：用户可以将文件推送到设备的指定目录。
+- **电源管理**：提供选项在退出投屏时关闭设备屏幕，或在屏幕关闭状态下继续投屏。
+- **设备保持唤醒**：确保设备在投屏期间保持唤醒状态。
+- **全屏模式**：支持全屏投屏。
+- **无线调试**：支持通过无线调试地址进行投屏。
+- **HID 输入**：支持通过鼠标和键盘控制设备。
+- **进程管理**：显示当前所有投屏进程，并提供关闭进程的功能。
 
-### Supporting Windows 7
-Configure the WebView2 runtime path in tauri.conf.json:
-```json
-{
-  "tauri": {
-    "bundle": {
-      "windows": {
-        "webviewInstallMode": {
-          "type": "fixedRuntime",
-          "path": "./Microsoft.WebView2.FixedVersionRuntime.98.0.1108.50.x64/"
-        }
-      }
-    }
-  }
-}
-```
+#### 用法
+1. 打开应用程序。
+2. 在“设备投屏”模块中，根据需要调整窗口位置、大小、文件推送路径等参数。
+3. 点击“投屏”按钮开始投屏。
+4. 使用提供的功能选项进行设备控制和管理。
+
+### 2. 音乐节奏动画生成 (Sprite.vue)
+#### 功能描述
+音乐节奏动画生成模块允许用户根据MIDI文件生成音乐节奏动画，并支持自定义图片和动画效果。
+
+#### 主要功能
+- **MIDI 文件上传**：用户可以上传MIDI文件，程序会解析文件并生成音乐节奏图。
+- **图片上传**：用户可以上传多张图片，并为每张图片设置出现条件。
+- **动画生成**：根据上传的MIDI文件和图片生成动画视频。
+- **输出路径选择**：用户可以选择生成的动画视频的保存路径。
+
+#### 用法
+1. 打开应用程序。
+2. 在“音乐节奏动画生成”模块中，上传MIDI文件。
+3. 上传多张图片，并为每张图片设置出现条件。
+4. 输入视频播放时长。
+5. 选择动画视频的保存路径。
+6. 点击“生成动画”按钮开始生成动画。
+
+### 3. JSON 格式化 (JsonView.vue)
+#### 功能描述
+JSON 格式化模块允许用户输入 JSON 字符串，并将其格式化为可读性更强的 JSON 格式。
+
+#### 主要功能
+- **JSON 输入**：用户可以输入 JSON 字符串。
+- **JSON 格式化**：程序会解析输入的 JSON 字符串并将其格式化。
+- **错误提示**：如果输入的 JSON 字符串格式不正确，程序会提示错误信息。
+
+#### 用法
+1. 打开应用程序。
+2. 在“JSON 格式化”模块中，输入 JSON 字符串。
+3. 查看格式化后的 JSON 数据。
+4. 如果输入的 JSON 字符串格式不正确，查看错误提示信息。
+
+### 4. JSON 列表解析 (JsonListView.vue)
+#### 功能描述
+JSON 列表解析模块允许用户输入 JSON 数组字符串，并将其解析为表格数据，同时支持导出为 Excel 文件。
+
+#### 主要功能
+- **JSON 数组输入**：用户可以输入 JSON 数组字符串。
+- **表格解析**：程序会解析输入的 JSON 数组字符串并将其转换为表格数据。
+- **表头配置**：用户可以选择预设的表头配置或手动输入表头配置。
+- **错误提示**：如果输入的 JSON 数组字符串格式不正确，程序会提示错误信息。
+- **Excel 导出**：用户可以将解析后的表格数据导出为 Excel 文件。
+
+#### 用法
+1. 打开应用程序。
+2. 在“JSON 列表解析”模块中，输入 JSON 数组字符串。
+3. 选择或手动输入表头配置。
+4. 查看解析后的表格数据。
+5. 如果输入的 JSON 数组字符串格式不正确，查看错误提示信息。
+6. 点击“导出Excel”按钮将表格数据导出为 Excel 文件。

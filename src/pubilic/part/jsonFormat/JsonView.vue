@@ -1,19 +1,17 @@
 <script setup>
-import { ref,computed } from "vue";
+import { ref, computed } from "vue";
 const jsonData = ref('')
 
-const jsonStr = computed(()=>{
+const jsonStr = computed(() => {
     if (!jsonData.value) {
-        return {"请录入json字符串":""}
+        return { "请录入json字符串": "" }
     }
     try {
         return JSON.parse(jsonData.value)
     } catch (e) {
-        return {"解析错误":`${e.toString()}`}
+        return { "解析错误": `${e.toString()}` }
     }
 })
-
-
 </script>
 <link rel="stylesheet" href="jquery.jsonview.css" />
 <template>
