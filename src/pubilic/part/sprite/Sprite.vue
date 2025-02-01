@@ -2,6 +2,26 @@
   <div>
     <div>
       <h3>音乐节奏</h3>
+      <el-form ref="form" :model="midiForm" :rules="midiFormRules" :inline="true"  label-width="120px">
+        <el-form-item label="BPM" prop="bpm">
+          <el-input
+            v-model.number="midiForm.bpm"
+            type="number"
+            placeholder="录入midiBPM"
+            :min="1"
+          />
+        </el-form-item>
+        <el-form-item label="调整时长" prop="videoPlayTime">
+          <el-input
+            v-model="midiForm.videoPlayTime"
+            type="text "
+            placeholder="时长 格式： 00:01:57.03"
+            :min="1"
+          />
+        </el-form-item>
+      </el-form>
+      
+
       <div id="music-rhythm" style="
             width: 100%;
             overflow-x: auto;
@@ -91,20 +111,25 @@
           <el-button type="primary">选择MIDI文件</el-button>
         </template>
       </el-upload>
-      <el-button type="success" @click="generateAnimation">生成动画</el-button>
+      <el-button type="primary" @click="selectOutputFolder">
+        <div v-if="outputFilePath" class="selected-path" :title="outputFilePath">
+          {{ "输出路径:" + outputFilePath }}
+        </div>
+        <span v-else>选择视频输出路径</span>
+      </el-button>
+      <el-button type="success" @click="generateAnimation" :disabled="isLoading" >{{ isLoading ? '生成中...' : '生成动画' }}</el-button>
     </div>
   </div>
 </template>
 
 <script>
-import { ElUpload, ElButton, ElInput } from 'element-plus';
+import { ElButton, ElMessage } from 'element-plus';
 import { invoke } from '@tauri-apps/api/tauri';
+import { open } from '@tauri-apps/api/dialog'; // 引入 open 函数
 
 export default {
   components: {
-    ElUpload,
     ElButton,
-    ElInput,
   },
   data() {
     return {
@@ -118,6 +143,29 @@ export default {
       hoveredKey: null, // 新增：用于存储当前悬停的 note 的 key 值
       mouseX: 0,
       mouseY: 0,
+      isLoading: false,
+      midiForm:{
+        bpm: 65,
+        videoPlayTime: '00:00:00.00',
+      },
+      midiFormRules: {
+        bpm: [
+          { required: true, message: '请输入BPM', trigger: 'blur' },
+          { type: 'number', message: 'BPM必须为数字值', trigger: 'blur' },
+        ],
+        videoPlayTime: [
+          { required: true, message: '请输入视频播放时长', trigger: 'blur' },
+          { validator: (rule, value, callback) => {
+            // 校验时间格式 00:00：00.00
+            if (!/^(\d{2}:){2}\d{2}.\d{2}$/.test(value)) {
+              callback(new Error('时间格式不正确,请输入格式：00:00:00.00'));
+            } else {
+              callback();
+            }   
+          }, trigger: 'blur' }
+        ]
+      },
+      outputFilePath: '', // 新增：用于存储输出文件路径
     };
   },
   methods: {
@@ -128,10 +176,14 @@ export default {
       const uint8Array = new Uint8Array(arrayBuffer);
       const midiData = Array.from(uint8Array);
 
-      const rhythm = await invoke('parse_midi', { file: midiData });
-      this.musicRhythm = JSON.parse(rhythm);
-      console.log(this.musicRhythm);
-      this.calculateTotalTime();
+      try {
+        const rhythm = await invoke('parse_midi', { file: midiData,bpm: this.midiForm.bpm });
+        this.musicRhythm = JSON.parse(rhythm);
+        this.calculateTotalTime();
+      }  
+      catch (error) {
+        ElMessage({  message: `解析midi文件失败: ${ JSON.stringify(error) }`,  type: 'warning',}) 
+      }
     },
     // 计算总时间
     calculateTotalTime() {
@@ -157,7 +209,27 @@ export default {
       this.images.push({ id: '', file: null, url: '' });
     },
     // 生成动画
-    generateAnimation() {
+    async generateAnimation() {
+      let res = await this.$refs.form.validate()
+      
+      console.log(res);
+      // 校验midiForm 
+      if (!this.midiFile) {
+        ElMessage({  message: '请上传midi文件',  type: 'warning',})
+        return;
+      }
+      if (this.images.length === 0) {
+        ElMessage({  message: '请上传图片',  type: 'warning',})
+        return;
+      }
+      if (!this.midiForm.videoPlayTime) {
+        ElMessage({  message: '请输入视频播放时长',  type: 'warning',})
+        return;
+      }
+      if (!this.outputFilePath) {
+        ElMessage({  message: '请选择输出路径',  type: 'warning',})
+        return;
+      }
       let isValid = true;
       this.images.forEach((image, index) => {
         if (image.condition !== 'any_value') {
@@ -182,15 +254,22 @@ export default {
         }
       });
       if (isValid) {
+        this.isLoading = true;
+
+        const arrayBuffer = await this.midiFile.arrayBuffer();
+        const uint8Array = new Uint8Array(arrayBuffer);
+        const midiData = Array.from(uint8Array);
+
         // 根据上传的 MIDI 文件和图片生成动画
-        console.log('musicRhythm:', this.musicRhythm, 'images:', this.images);
-        invoke('generate_animation', { musicRhythm: this.musicRhythm, images: this.images })
+        invoke('generate_animation', { file: midiData, images: this.images , bpm: this.midiForm.bpm, videoPlayTime: this.midiForm.videoPlayTime, outputPath: this.outputFilePath })
           .then(response => {
-            console.log('Animation generated:', response);
+            ElMessage({  message: '已生成动画',  type: 'success',})
           })
           .catch(error => {
-            console.error('Error generating animation:', error);
-          });
+            ElMessage({  message: `生成动画失败: ${error}`,  type: 'warning',})
+          }).finally(()=>{
+            this.isLoading = false;
+          })
       }
     },
     // 删除图片
@@ -313,6 +392,19 @@ export default {
         }
       }
     },
+    // 处理输出文件路径选择
+    async selectOutputFolder() {
+      try {
+        const selected = await open({
+          directory: true, // 设置为选择文件夹
+        });
+        if (selected) {
+          this.outputFilePath = selected;
+        }
+      } catch (error) {
+        ElMessage({ message: '选择文件夹失败', type: 'warning' });
+      }
+    },
   },
 };
 </script>
@@ -413,4 +505,22 @@ export default {
   border-radius: 5px;
   z-index: 1000;
 }
+
+.midi-info-item{
+  width: 300px; 
+  display: flex; 
+  justify-content: space-between; 
+  align-items: center;
+  margin: 0.2em 0;
+}
+
+.midi-info-item > .el-input {
+  width: 50%;
+}
+
+.selected-path {
+  max-width: 100px;
+  overflow: hidden;
+}
+
 </style>

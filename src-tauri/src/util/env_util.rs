@@ -18,6 +18,11 @@ pub fn get_process_root_path() -> Result<String, String> {
     }
 }
 
+pub fn build_root_command_arg(process_path: &str, args: Box<Vec<&str>>) -> Result<String, String> {
+    let param_str = args.iter().fold(String::new(), |acc, e| format!("{} {}", acc, e));
+    build_root_command(process_path, &param_str)
+}
+
 /// 创建一个根命令
 ///
 /// 此函数负责构建一个Command实例，该实例代表了将要执行的根命令。根命令通常是指程序启动时

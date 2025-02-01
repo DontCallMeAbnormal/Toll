@@ -177,11 +177,11 @@ pub fn cmd_exec_no_window(cmd: &str) -> Result<String, String> {
     let output = output.unwrap();
     if output.status.success() {
         let chars = std_to_string(&output.stdout);
-        app_log!("cmd_exec_no_window:{}", chars);
+        app_log!("cmd_exec_no_window: success");
         return Ok(chars);
     } else {
         let chars = std_to_string(&output.stderr);
-        app_log!("Failed cmd_exec_no_window:{}", chars);
+        app_log!("Failed cmd_exec_no_window: Failed");
         return Err(chars);
     }
 }
