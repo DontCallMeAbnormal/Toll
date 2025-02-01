@@ -10,7 +10,9 @@ pub fn get_process_root_path() -> Result<String, String> {
     match root_dir {
         Some(path_buf) => {
             if let Some(current_exe_path) = path_buf.as_os_str().to_str() {
-                return Ok(current_exe_path.to_string());
+                // 将" "替换为"^ "
+                let current_exe_path = current_exe_path.replace(" ", "^ "); 
+                return Ok(current_exe_path);
             }
             return Err("获取程序运行目录失败".to_string());
         }
@@ -43,14 +45,14 @@ pub fn build_root_command(process_path: &str, param: &str) -> Result<String, Str
     let current_exe_path = get_process_root_path()?;
     // 构造scrcpy执行文件的完整路径
     let mut commd_path = String::new();
-    // commd_path.push_str("\"");
     commd_path.push_str(&current_exe_path);
     commd_path.push_str("\\");
     commd_path.push_str(process_path);
-    // commd_path.push_str("\"");
 
     cmd_command.push_str(&commd_path);
-    cmd_command.push_str(" ");
-    cmd_command.push_str(param);
+    if param != "" {
+        cmd_command.push_str(" ");
+        cmd_command.push_str(param);
+    }
     Ok(cmd_command)
 }

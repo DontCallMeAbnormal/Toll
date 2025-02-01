@@ -185,3 +185,30 @@ pub fn cmd_exec_no_window(cmd: &str) -> Result<String, String> {
         return Err(chars);
     }
 }
+
+pub fn cmd_exec_no_window_args(args: Vec<&str>) -> Result<String, String> {
+
+    
+    let mut binding = Command::new("cmd");
+    binding.creation_flags(CREATE_NO_WINDOW);
+    binding.arg("/C");
+    for arg in args {
+        binding.arg(arg);
+    }
+    app_log!("cmd : {:?}", binding);
+    let output = binding.output();
+    if let Err(err) = output {
+        app_log!("Failed to execute command: {}", err);
+        return Err(format!("Failed to execute command: {}", err));
+    }
+    let output = output.unwrap();
+    if output.status.success() {
+        let chars = std_to_string(&output.stdout);
+        app_log!("cmd_exec_no_window: success");
+        return Ok(chars);
+    } else {
+        let chars = std_to_string(&output.stderr);
+        app_log!("Failed cmd_exec_no_window: Failed");
+        return Err(chars);
+    }
+}

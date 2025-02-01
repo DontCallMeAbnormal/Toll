@@ -4,7 +4,7 @@ use serde_json::json;
 use std::collections::HashMap;
 use tempfile::Builder;
 use crate::midi_handle::{self, ffmpeg_util};
-use crate::windows_interface::hidden_proecss::cmd_exec_no_window;
+use crate::windows_interface::hidden_proecss::{cmd_exec_no_window, cmd_exec_no_window_args};
 use crate::util::env_util;
 
 #[tauri::command]
@@ -164,9 +164,17 @@ pub async fn generate_animation(
     }
 }
 
-fn generate_video(animation_data: &Vec<serde_json::Value>, any_value_image_url: &str,output_path: &str,video_play_time: u64) -> Result<(), String> {
-    // 创建临时文件来存储帧图像
-    let temp_dir = Builder::new().prefix("midi_frames").tempdir().map_err(|e| format!("Failed to create temp dir: {}", e))?;
+fn generate_video(animation_data: &Vec<serde_json::Value>, any_value_image_url: &str, output_path: &str, video_play_time: u64) -> Result<(), String> {
+    let root_path = env_util::get_process_root_path()?;
+    let temp_dir = format!("{}\\target\\temp", root_path);
+    // 创建目标临时目录
+    let target_temp_dir = std::path::Path::new(&temp_dir);
+    if !target_temp_dir.exists() {
+        std::fs::create_dir_all(target_temp_dir).map_err(|e| format!("Failed to create target temp dir: {}", e))?;
+    }
+
+    // 使用目标临时目录来创建临时文件
+    let temp_dir = Builder::new().prefix("midi_frames").tempdir_in(target_temp_dir).map_err(|e| format!("Failed to create temp dir in target: {}", e))?;
 
     let mut last_frame_time = 0.0;
     let mut count: i64 = 0;
@@ -223,23 +231,24 @@ fn generate_video(animation_data: &Vec<serde_json::Value>, any_value_image_url: 
     let input_pattern = binding.to_str().unwrap_or("");
     let output_file = format!(r"{}\output_temp.mp4", &output_path);
 
+    
+
+    let cmd_str = env_util::build_root_command("plugin\\ffmpeg\\bin\\ffmpeg.exe", "")?;
+    app_log!("cmd_str => {:?}", cmd_str);
     let param_str = vec![
+        &cmd_str,
         "-framerate",
         "60",
         "-i",
-        input_pattern,
+        &input_pattern,
         "-c:v",
         "libx264",
         "-pix_fmt",
         "yuv420p",
         &output_file,
     ];
-
-    let param_str = param_str.iter().fold(String::new(), |acc, e| format!("{} {}", acc, e));
-    let cmd_str = env_util::build_root_command("plugin\\ffmpeg\\bin\\ffmpeg.exe", &param_str)?;
-    app_log!("cmd_str => {:?}", cmd_str);
-    // Ok(())
-    match cmd_exec_no_window(&cmd_str) {
+    app_log!("生成视频 cmd_str => {:?}", param_str);
+    match cmd_exec_no_window_args(param_str) {
         Ok(_) => {
             let video_time = midi_handle::ffmpeg_util::get_video_duration(&output_file);
             if let Ok(v_time) = video_time {
@@ -259,7 +268,9 @@ fn generate_video(animation_data: &Vec<serde_json::Value>, any_value_image_url: 
                 };
                 // 时长转换后的视频存储位置
                 let output_trans_file = format!(r"{}\output.mp4", &output_path);
+                cmd_str = env_util::build_root_command("plugin\\ffmpeg\\bin\\ffmpeg.exe", "")?;
                 let param_str = vec![
+                    &cmd_str,
                     "-i",
                     &output_file,
                     "-vf",
@@ -268,9 +279,8 @@ fn generate_video(animation_data: &Vec<serde_json::Value>, any_value_image_url: 
                     &atempo_filter,
                     &output_trans_file,
                 ];
-                cmd_str = env_util::build_root_command_arg("plugin\\ffmpeg\\bin\\ffmpeg.exe", Box::new(param_str))?;
-                app_log!("时长转换： cmd_str => {:?}",cmd_str);
-                match cmd_exec_no_window(&cmd_str) {
+                app_log!("时长转换： cmd_str => {:?}", param_str);
+                match cmd_exec_no_window_args(param_str) {
                     Ok(_) => {
                         app_log!("视频转换成功");
                         // 删除文件output_file
