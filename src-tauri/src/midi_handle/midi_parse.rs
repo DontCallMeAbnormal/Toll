@@ -126,7 +126,8 @@ pub async fn generate_animation(
                 "equal_to" => key == value.parse::<u64>().unwrap_or(0),
                 "less_than" => key < value.parse::<u64>().unwrap_or(0),
                 "range" => {
-                    let range: Vec<u64> = value
+                    let range_string = value.replace("[", "").replace("]", "");
+                    let range: Vec<u64> = range_string
                         .split(',')
                         .filter_map(|s| s.trim().parse().ok())
                         .collect();
